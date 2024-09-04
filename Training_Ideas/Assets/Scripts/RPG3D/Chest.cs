@@ -10,8 +10,14 @@ public class Chest : MonoBehaviour
     public float colliderRadius;
     public bool isOpen;
 
+    [Header("Chest Canvas Variables")]
+    public GameObject E;
+
     public List<Item> items = new List<Item>();
-    
+
+    // Lista estática para rastrear os itens únicos que já foram coletados
+    private static List<Item.Type> collectedUniqueItems = new List<Item.Type>();
+
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -30,46 +36,75 @@ public class Chest : MonoBehaviour
             {
                 if (c.gameObject.tag == "Player")
                 {
+                    E.SetActive(true);
+
                     if (Input.GetKeyDown(KeyCode.E))
+                    {
                         OpenChest();
+                        E.SetActive(false);
+                    }
+                }
+                else
+                {
+                    E.SetActive(false);
                 }
             }
         }
+        else
+        {
+            E.SetActive(false);
+        }
     }
 
-    //executa quando pega os iten de dentro do baú
     void OpenChest()
     {
         if (items.Count > 0)
         {
             int randomI = Random.Range(0, items.Count);
+            Item selectedItem = items[randomI];
 
-            Inventory.instance.CreateItem(items[randomI]);
-
-            anim.SetTrigger("open");
-            switch (items[randomI].itemType.ToString())
+            // Verifica se o item é único e se já foi coletado
+            if (IsUniqueItem(selectedItem.itemType) && collectedUniqueItems.Contains(selectedItem.itemType))
             {
-                case "Shield":
-                    items.RemoveAt(randomI);
-                    break;
-                case "Sword":
-                    items.RemoveAt(randomI);
-                    break;
-                case "Axe":
-                    items.RemoveAt(randomI);
-                    break;
-                case "Chest":
-                    items.RemoveAt(randomI);
-                    break;
+                return; // O item único já foi coletado, então não faz nada
             }
 
+            // Cria o item
+            Inventory.instance.CreateItem(selectedItem);
+
+            // Se for um item único, marca como coletado
+            if (IsUniqueItem(selectedItem.itemType))
+            {
+                collectedUniqueItems.Add(selectedItem.itemType);
+                RemoveItemFromAllChests(selectedItem); // Remove o item de todos os baús
+            }
+
+            anim.SetTrigger("open");
             isOpen = true;
         }
         else
         {
-            return;
+            Debug.Log("O baú está vazio!");
         }
     }
 
+    // Função para verificar se o item é único
+    bool IsUniqueItem(Item.Type itemType)
+    {
+        return itemType == Item.Type.Shield || itemType == Item.Type.Sword ||
+               itemType == Item.Type.Axe || itemType == Item.Type.Chestplate;
+    }
 
+    // Função para remover um item de todos os baús na cena
+    void RemoveItemFromAllChests(Item itemToRemove)
+    {
+        // Encontra todos os baús ativos na cena
+        Chest[] allChests = FindObjectsOfType<Chest>();
+
+        // Remove o item da lista de cada baú
+        foreach (Chest chest in allChests)
+        {
+            chest.items.Remove(itemToRemove);
+        }
+    }
 }

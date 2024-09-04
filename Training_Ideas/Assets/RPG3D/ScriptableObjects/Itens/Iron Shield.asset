@@ -16,4 +16,5 @@ MonoBehaviour:
   name: Iron Shield
   value: 8
   itemType: 5
-  slotsType: 2
+  slotsType: 3
+  player: {fileID: 0}

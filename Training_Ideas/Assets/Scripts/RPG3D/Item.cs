@@ -26,6 +26,7 @@ public class Item : ScriptableObject
 
     public enum SlotsType
     {
+        Inventory,
         Sword,
         Chest,
         Shield

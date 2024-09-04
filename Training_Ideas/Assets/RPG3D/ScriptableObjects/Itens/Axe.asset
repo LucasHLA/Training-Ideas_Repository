@@ -16,5 +16,5 @@ MonoBehaviour:
   name: Axe
   value: 10
   itemType: 6
-  slotsType: 0
+  slotsType: 1
   player: {fileID: 0}

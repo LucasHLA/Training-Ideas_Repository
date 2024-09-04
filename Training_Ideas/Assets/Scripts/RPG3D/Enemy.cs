@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Diagnostics;
-
+using UnityEngine.UI;
 public class Enemy : MonoBehaviour
 {
     [Header("Enemy Basic Variables")]
@@ -29,6 +29,12 @@ public class Enemy : MonoBehaviour
     public float colliderRadius;
     public bool playerIsAlive;
 
+    [Header("Life variables")]
+    public Image healthBar;
+
+    [Header("Enemy Path Variables")]
+    public List<Transform> pathPoints = new List<Transform>();
+    public int currentPathIndex = 0;
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -38,6 +44,24 @@ public class Enemy : MonoBehaviour
         playerIsAlive = true;
     }
 
+    void MoveToNextPoint()
+    {
+        if(pathPoints.Count > 0)
+        {
+            float distance = Vector3.Distance(pathPoints[currentPathIndex].position,transform.position);
+            navAgent.destination = pathPoints[currentPathIndex].position;
+
+            if(distance <= 4f)
+            {
+                //currentPathIndex++;
+                currentPathIndex = Random.Range(0, pathPoints.Count);
+                currentPathIndex %= pathPoints.Count;
+            }
+
+            state = State.Walk;
+            anim.SetBool("Walking", true);
+        }
+    }
 
     void Update()
     {
@@ -81,7 +105,8 @@ public class Enemy : MonoBehaviour
             state = State.Idle;
             anim.SetBool("Walking", false);
             anim.SetBool("Attacking", false);
-            navAgent.isStopped = true;
+            //navAgent.isStopped = true;
+            MoveToNextPoint();
         }
     }
 
@@ -106,6 +131,8 @@ public class Enemy : MonoBehaviour
     {
         currentHealth -= dmg;
 
+        healthBar.fillAmount = currentHealth / totalHealth;
+
         if (currentHealth > 0)
         {
             StopCoroutine("Attack");
@@ -123,6 +150,7 @@ public class Enemy : MonoBehaviour
     {
         if(currentHealth <= 0)
         {
+            StopCoroutine("Attack");
             state = State.Death;
             capsule.enabled = false;
             Destroy(this.gameObject, 10f);
@@ -163,7 +191,7 @@ public class Enemy : MonoBehaviour
             }
             yield return new WaitForSeconds(0.8f);
             GetEnemy();
-            yield return new WaitForSeconds(0.7f);
+            //yield return new WaitForSeconds(0.7f);
             anim.SetBool("Attacking", false);
             attackIsReady = false;
             isAttacking = false;

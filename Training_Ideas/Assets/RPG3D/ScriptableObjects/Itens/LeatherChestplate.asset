@@ -16,4 +16,5 @@ MonoBehaviour:
   name: Leather Chestplate
   value: 15
   itemType: 3
-  slotsType: 1
+  slotsType: 2
+  player: {fileID: 0}

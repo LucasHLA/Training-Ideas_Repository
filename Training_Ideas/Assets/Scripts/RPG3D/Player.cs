@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
+using UnityEngine.UI;
 public class Player : MonoBehaviour
 {
     [Header ("Basic Moviment variables")]
@@ -36,6 +36,7 @@ public class Player : MonoBehaviour
     [Header ("Life variables")]
     public float totalHealth = 100f;
     public float currentHealth;
+    public Image healthBar;
 
     void Start()
     {
@@ -49,7 +50,8 @@ public class Player : MonoBehaviour
     
     void Update()
     {
-        if(EventSystem.current.currentSelectedGameObject == null)
+        healthBar.fillAmount = currentHealth / totalHealth;
+        if (EventSystem.current.currentSelectedGameObject == null)
         {
             Move();
             GetMouseInput();
@@ -247,10 +249,12 @@ public class Player : MonoBehaviour
             if (!anim.GetBool("Defending"))
             {
                 currentHealth -= dmg;
+                //healthBar.fillAmount = currentHealth / totalHealth;
             }
             else
             {
                 currentHealth -= dmg - (dmg / 2);
+                //healthBar.fillAmount = currentHealth / totalHealth;
             }
 
             StopCoroutine("Attack");
